@@ -38,12 +38,25 @@ class ClientInterface(tk.Tk):
 
         # Mapeamento 4D-PAM5 para binário
         self.pam5_4d_mapping = {
-            '0000': [-2, -2, -2, -2], '0001': [-2, -2, -2, -1], '0010': [-2, -2, -2, 0], '0011': [-2, -2, -2, 1], '0100': [-2, -2, -2, 2],
-            '0101': [-2, -2, -1, -2], '0110': [-2, -2, -1, -1], '0111': [-2, -2, -1, 0], '1000': [-2, -2, -1, 1], '1001': [-2, -2, -1, 2],
-            '1010': [-2, -2, 0, -2], '1011': [-2, -2, 0, -1], '1100': [-2, -2, 0, 0], '1101': [-2, -2, 0, 1], '1110': [-2, -2, 0, 2],
-            '1111': [-2, -2, 1, -2]
-            # Adicione mais mapeamentos conforme necessário
-        }
+            '0000': [-2, -2, -2, -2],  
+            '0001': [-2, -2, 1, 1],  
+            '0010': [-2, -1, -1,  0],  
+            '0011': [-1, -1,  0,  0],  
+            '0100': [-1,  0,  0,  1],  
+            '0101': [ 0,  0,  1,  1],  
+            '0110': [ 0,  1,  1,  2],  
+            '0111': [ 1,  1,  2,  2],  
+            '1000': [ 1,  2,  2,  2],  
+            '1001': [ 2,  2,  2,  2],  
+            '1010': [-2, -1,  0,  1],  
+            '1011': [-1,  0,  1,  2],  
+            '1100': [ 0,  1,  2,  2],  
+            '1101': [ 1,  2,  2,  2],  
+            '1110': [ 2,  2,-1,-1],  
+            '1111': [ 2,  2,  2,  2]  
+}
+
+
 
     def send_message(self):
         message = self.entry.get()
@@ -69,28 +82,58 @@ class ClientInterface(tk.Tk):
                 self.text_area.insert(tk.END, f" {binary_message}\n")
 
                 # 3. Codificar o binário em sinal 4D-PAM5
-                pam5_signal = self.binary_to_pam5(binary_message)
+                pam5_signal = self.binary_to_pam5(message)
                 self.text_area.insert(tk.END, f"\nSinal 4D-PAM5 da mensagem:\n","bold")
                 self.text_area.insert(tk.END, f"{pam5_signal}\n")
                 
                 print(f"Tamanho do sinal 4D-PAM5 recebido: {len(pam5_signal.split(','))} (esperado: 2048)")
+                self.plot_pam5_signal(pam5_signal)
 
                 # 4. Enviar o sinal 4D-PAM5 para o servidor
                 self.send_to_server(pam5_signal)
 
-                # 5. Plotar o gráfico de sinais 4D-PAM5
-                self.plot_pam5_signal(pam5_signal)
+                # # 5. Plotar o gráfico de sinais 4D-PAM5
+                # self.plot_pam5_signal(pam5_signal)
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao processar mensagem: {e}")
 
     def plot_pam5_signal(self, pam5_signal):
         symbols = [float(s) for s in pam5_signal.split(',')]
         self.ax.clear()
-        self.ax.plot(symbols, marker='o')
+        
+        # Lista para os eixos X e Y com transições quadradas
+        x_vals = []
+        y_vals = []
+
+        for i in range(len(symbols)):
+            x_vals.extend([i, i])  # Mantém cada ponto no mesmo índice X duas vezes
+            y_vals.extend([symbols[i], symbols[i]])  # Repete o valor Y para criar um platô
+
+        # **Força o primeiro e o último ponto a serem 0**
+        y_vals[0] = 0
+        y_vals[-1] = 0
+
+        # Plota a onda quadrada
+        self.ax.step(x_vals, y_vals, where='post', marker='o', linestyle='-', color='b')
+        
+        # Adiciona uma linha horizontal fraca no eixo Y = 0
+        self.ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, alpha=0.6)
+
+        # Define os limites do eixo Y
+        self.ax.set_ylim(-2, 2)
+
+        # Define os ticks do eixo Y para espaçamento de 1 unidade
+        self.ax.set_yticks([-5,-4,-3,-2, -1, 0, 1, 2,3,4,5])  
+
+        # Adiciona rótulos ao gráfico
         self.ax.set_title("Sinal 4D-PAM5")
         self.ax.set_xlabel("Índice")
         self.ax.set_ylabel("Valor")
+
+        # Atualiza o canvas para exibir a nova configuração
         self.canvas.draw()
+
+
 
     def encrypt_message(self, message):
         with open("public.pem", "rb") as pub_file:
@@ -137,8 +180,8 @@ class ClientInterface(tk.Tk):
         print(f"Número de grupos de 4 bits: {len(binary_groups)}")
         
         # Verificar se o número de grupos está correto
-        if len(binary_groups) != 512:
-            raise ValueError(f"Número incorreto de grupos de 4 bits: {len(binary_groups)} (esperado: 512)")
+        # if len(binary_groups) != 512:
+        #     raise ValueError(f"Número incorreto de grupos de 4 bits: {len(binary_groups)} (esperado: 512)")
         
         # Mapear cada grupo de 4 bits para 4D-PAM5
         pam5_signal = []

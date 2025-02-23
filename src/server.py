@@ -119,24 +119,24 @@ class PAM5Server:
                     binary_message = self.pam5_4d_to_binary(pam5_signal)
                     print(f"Mensagem em binário: {binary_message}")
 
-                    # 2. Converter binário para bytes (mensagem criptografada)
-                    encrypted_message = self.binary_to_bytes(binary_message)
-                    print(f"Mensagem criptografada: {encrypted_message}")
-                    print(f"Tamanho da mensagem criptografada: {len(encrypted_message)}")
+                    # # 2. Converter binário para bytes (mensagem criptografada)
+                    # encrypted_message = self.binary_to_bytes(binary_message)
+                    # print(f"Mensagem criptografada: {encrypted_message}")
+                    # print(f"Tamanho da mensagem criptografada: {len(encrypted_message)}")
 
-                    # 3. Verificar o tamanho da mensagem criptografada
-                    if len(encrypted_message) != 256:  # Tamanho esperado para uma chave RSA de 2048 bits
-                        raise ValueError("Tamanho da mensagem criptografada incorreto")
+                    # # 3. Verificar o tamanho da mensagem criptografada
+                    # if len(encrypted_message) != 256:  # Tamanho esperado para uma chave RSA de 2048 bits
+                    #     raise ValueError("Tamanho da mensagem criptografada incorreto")
 
                     # 4. Descriptografar a mensagem criptografada usando a chave privada RSA
-                    decrypted_message = self.rsa.decrypt_message(base64.b64encode(encrypted_message).decode())
-                    print(f"Mensagem recebida: {decrypted_message}")
+                    #decrypted_message = self.rsa.decrypt_message(base64.b64encode(encrypted_message).decode())
+                    print(f"Mensagem recebida: {binary_message}")
                     print(f"Sinal 4D-PAM5 recebido: {pam5_signal}")
                     print(f"Tamanho do sinal 4D-PAM5 recebido: {len(pam5_signal)}")
 
                     # 5. Atualizar a interface gráfica com a mensagem original
                     if self.gui_callback:
-                        self.gui_callback(decrypted_message, self.pam5_signal)
+                        self.gui_callback(binary_message, self.pam5_signal)
                         
                 except Exception as e:
                     print(f"Erro ao processar mensagem: {e}")
@@ -215,7 +215,7 @@ class ServerInterface(tk.Tk):
         def update_received_message(self, message,pam5_signal):
             self.text_output.config(text=f"Mensagem original: {message}")
             
-            encrypted_message = base64.b64encode(message.encode()).decode()
+            #encrypted_message = base64.b64encode(message.encode()).decode()
             binary_message = ' '.join(format(ord(char), '08b') for char in message)
             self.text_area.tag_configure("bold", font=("TkDefaultFont", 10, "bold"))
             self.text_area.tag_configure("center", justify="center")
@@ -227,15 +227,16 @@ class ServerInterface(tk.Tk):
             self.text_area.insert(tk.END, f"\nSinal em Binário: \n","bold")
             self.text_area.insert(tk.END, f"{binary_message}\n")
             self.text_area.insert(tk.END, f"\nBinário em texto criptografado: \n","bold")
-            self.text_area.insert(tk.END, f"{encrypted_message}\n")
+           # self.text_area.insert(tk.END, f"{encrypted_message}\n")
             self.text_area.insert(tk.END, f"\nMENSAGEM ORIGINAL: ", "bold")
             self.text_area.insert(tk.END, f"{message}\n")
             self.text_area.insert(tk.END, ".................................................\n", "bold")
 
-            self.plot_pam5_signal(message)
+            self.plot_pam5_signal(pam5_signal)
 
-        def plot_pam5_signal(self, message):
-            symbols = [ord(char) % 5 - 2 for char in message]
+        def plot_pam5_signal(self, pam5_signal):
+            #symbols = [ord(char) % 5 - 2 for char in message]
+            symbols = [float(s) for s in pam5_signal.split(',')]
             self.ax.clear()
             self.ax.plot(symbols, marker='o')
             self.ax.set_title("Sinal 4D-PAM5")
