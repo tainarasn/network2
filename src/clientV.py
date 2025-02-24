@@ -89,7 +89,7 @@ class ClientInterface(tk.Tk):
             try:
                 if self.use_encryption:
                     # 1. Criptografar a mensagem com a Cifra de Vigenère
-                    key = "chave_secreta"  # Chave fixa para exemplo
+                    key = "aB3$fG7!kL9@mN1#pQ5"  # chave
                     encrypted_message = self.vigenere_encrypt(message, key)
                     
                     # 2. Codificar a mensagem criptografada em Base64
@@ -146,21 +146,6 @@ class ClientInterface(tk.Tk):
 
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao processar mensagem: {e}")
-
-    def text_to_pam5(self, message):
-        # Converter cada caractere da mensagem para 4D-PAM5
-        pam5_signal = []
-        for char in message:
-            # Converter o caractere para seu valor ASCII e depois para binário de 8 bits
-            binary_char = format(ord(char), '08b')
-            # Dividir o binário em grupos de 4 bits e mapear para 4D-PAM5
-            for i in range(0, len(binary_char), 4):
-                group = binary_char[i:i+4]
-                if group in self.pam5_4d_mapping:
-                    pam5_signal.extend(self.pam5_4d_mapping[group])
-                else:
-                    pam5_signal.extend([0, 0, 0, 0])  # Valor padrão se o grupo não for encontrado
-        return ','.join(map(str, pam5_signal)).strip(',')
 
     def plot_pam5_signal(self, pam5_signal):
         symbols = [float(s) for s in pam5_signal.split(',')]
@@ -227,7 +212,7 @@ class ClientInterface(tk.Tk):
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect(("localhost", 5050))
-            client_socket.sendall(pam5_signal.encode('latin-1'))  # Usar utf-8 para ASCII estendido
+            client_socket.sendall(pam5_signal.encode('latin-1'))  # Usar latin-1 para ASCII estendido
             print(f"Sinal 4D-PAM5 enviado: {pam5_signal}")
             client_socket.close()
             messagebox.showinfo("Sucesso", "Mensagem enviada com sucesso!")

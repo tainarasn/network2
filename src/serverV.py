@@ -98,7 +98,7 @@ class PAM5Server:
                             raise ValueError("String Base64 inválida")
 
                         # 4. Descriptografar a mensagem criptografada usando a Cifra de Vigenère
-                        key = "chave_secreta"  # Chave fixa para exemplo
+                        key = "aB3$fG7!kL9@mN1#pQ5"  # chave
                         decrypted_message = self.vigenere_decrypt(encrypted_message.decode('latin-1'), key)
                         print(f"Mensagem recebida: {decrypted_message}")
                     else:
@@ -109,7 +109,10 @@ class PAM5Server:
 
                     # 5. Atualizar a interface gráfica com a mensagem original
                     if self.gui_callback:
-                        self.gui_callback(decrypted_message, self.pam5_signal)
+                        if self.use_decryption:
+                            self.gui_callback(decrypted_message, self.pam5_signal,encrypted_message_base64)
+                        else:
+                            self.gui_callback(decrypted_message, self.pam5_signal)
                                 
                 except Exception as e:
                     print(f"Erro ao processar mensagem: {e}")
@@ -139,7 +142,6 @@ class PAM5Server:
             vector = tuple(symbols[i:i+4])
             closest_value = min(self.reverse_map.keys(), key=lambda x: np.linalg.norm(np.array(x) - np.array(vector)))
             binary_message += self.reverse_map[closest_value]
-            print(f"Vetor 4D-PAM5: {vector} -> Binário: {self.reverse_map[closest_value]}")
         
         print(f"Mensagem em binário: {binary_message}")
         print(f"Tamanho da mensagem binária: {len(binary_message)} bits")
@@ -150,12 +152,6 @@ class PAM5Server:
         print(f"Binário para conversão: {binary_message}")
         # Converter binário para texto usando ASCII estendido
         text = ''.join(chr(int(binary_message[i:i+8], 2)) for i in range(0, len(binary_message), 8))
-        return text
-
-    def pam5_to_text(self, pam5_signal):
-        # Decodificar o sinal 4D-PAM5 diretamente para texto
-        binary_message = self.pam5_4d_to_binary(pam5_signal)
-        text = self.binary_to_bytes(binary_message)
         return text
             
 class ServerInterface(tk.Tk):
@@ -199,7 +195,7 @@ class ServerInterface(tk.Tk):
         server_thread.start()
         messagebox.showinfo("Servidor", "Servidor iniciado e aguardando conexões!")
 
-    def update_received_message(self, message, pam5_signal):
+    def update_received_message(self, message, pam5_signal,encrypted=''):
         self.text_output.config(text=f"Mensagem original: {message}")
         
         binary_message = ' '.join(format(ord(char), '08b') for char in message)
@@ -211,8 +207,11 @@ class ServerInterface(tk.Tk):
         self.text_area.insert(tk.END, f"{pam5_signal}\n")
         self.text_area.insert(tk.END, f"\nSinal em Binário: \n","bold")
         self.text_area.insert(tk.END, f"{binary_message}\n")
+        if encrypted != '':
+            self.text_area.insert(tk.END, f"\nSinal criptogafado: \n","bold")
+            self.text_area.insert(tk.END, f"{encrypted}\n")
         self.text_area.insert(tk.END, f"\nMENSAGEM ORIGINAL: ", "bold")
-        self.text_area.insert(tk.END, f"{message}\n")
+        self.text_area.insert(tk.END, f"{message if encrypted != '' else binary_message}\n")
         self.text_area.insert(tk.END, ".................................................\n", "bold")
 
         self.plot_pam5_signal(pam5_signal)
