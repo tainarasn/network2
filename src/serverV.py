@@ -76,19 +76,19 @@ class PAM5Server:
                     print(f"Tamanho do sinal 4D-PAM5 recebido: {len(pam5_signal.split(','))}")
 
                     if self.use_decryption:
-                        # 1. Decodificar 4D-PAM5 para binário
+                        # decodifica 4D-PAM5 para binário
                         binary_message = self.pam5_4d_to_binary(pam5_signal)
 
-                        # 2. Converter binário para texto (mensagem criptografada em Base64)
+                        # converte binário para texto (mensagem criptografada em Base64)
                         encrypted_message_base64 = self.binary_to_bytes(binary_message)
                         print(f"Mensagem criptografada (Base64): {encrypted_message_base64}")
 
-                        # Adicionar padding à string Base64, se necessário
+                        # adiciona padding à string Base64, se necessário
                         padding = len(encrypted_message_base64) % 4
                         if padding:
                             encrypted_message_base64 += '=' * (4 - padding)
 
-                        # 3. Decodificar a mensagem criptografada de Base64
+                        # decodifica a mensagem criptografada de Base64
                         try:
                             print(f"Mensagem criptografada (Base64 recebida): {encrypted_message_base64}")
                             encrypted_message = base64.b64decode(encrypted_message_base64.encode('latin-1'))
@@ -97,17 +97,17 @@ class PAM5Server:
                             print(f"Erro ao decodificar Base64: {e}")
                             raise ValueError("String Base64 inválida")
 
-                        # 4. Descriptografar a mensagem criptografada usando a Cifra de Vigenère
+                        # descriptografa a mensagem criptografada usando a Cifra de Vigenère
                         key = "aB3$fG7!kL9@mN1#pQ5"  # chave
                         decrypted_message = self.vigenere_decrypt(encrypted_message.decode('latin-1'), key)
                         print(f"Mensagem recebida: {decrypted_message}")
                     else:
-                        # Se a descriptografia estiver desativada, decodificar o sinal 4D-PAM5 diretamente para texto
+                        # se a descriptografia estiver desativada, decodificar o sinal 4D-PAM5 diretamente para texto
                         binary_message = self.pam5_4d_to_binary(pam5_signal)
                         decrypted_message = self.binary_to_bytes(binary_message)
                         print(f"Mensagem recebida (sem descriptografia): {decrypted_message}")
 
-                    # 5. Atualizar a interface gráfica com a mensagem original
+                    # atualiza a interface gráfica com a mensagem original
                     if self.gui_callback:
                         if self.use_decryption:
                             self.gui_callback(decrypted_message, self.pam5_signal,encrypted_message_base64)
@@ -125,7 +125,7 @@ class PAM5Server:
         if not pam5_signal:
             raise ValueError("Sinal 4D-PAM5 recebido está vazio")
     
-        # Verificar se o sinal contém apenas números e vírgulas
+        # verifica se o sinal contém apenas números e vírgulas
         if not all(c.isdigit() or c == ',' or c == '-' for c in pam5_signal):
             raise ValueError("Sinal 4D-PAM5 contém caracteres inválidos")
         
@@ -150,7 +150,7 @@ class PAM5Server:
     def binary_to_bytes(self, binary_message):
         binary_message = binary_message.replace(" ", "")
         print(f"Binário para conversão: {binary_message}")
-        # Converter binário para texto usando ASCII estendido
+        # converte binário para texto usando ASCII estendido
         text = ''.join(chr(int(binary_message[i:i+8], 2)) for i in range(0, len(binary_message), 8))
         return text
             
@@ -167,7 +167,7 @@ class ServerInterface(tk.Tk):
         self.start_button = tk.Button(self, text="Iniciar Servidor", command=self.start_server)
         self.start_button.pack(pady=10)
 
-        # Botão para ativar/desativar descriptografia
+        # botão para ativar/desativar descriptografia
         self.decryption_button = tk.Button(self, text="Desativar Descriptografia", command=self.toggle_decryption)
         self.decryption_button.pack(pady=10)
 
@@ -182,7 +182,7 @@ class ServerInterface(tk.Tk):
         self.canvas.get_tk_widget().pack(pady=10)
 
     def toggle_decryption(self):
-        # Alternar entre ativar e desativar a descriptografia
+        # alternar entre ativar e desativar a descriptografia
         self.server.use_decryption = not self.server.use_decryption
         if self.server.use_decryption:
             self.decryption_button.config(text="Desativar Descriptografia")
@@ -228,7 +228,7 @@ class ServerInterface(tk.Tk):
             x_vals.extend([i, i])  # Mantém cada ponto no mesmo índice X duas vezes
             y_vals.extend([symbols[i], symbols[i]])  # Repete o valor Y para criar um platô
 
-        # **Força o primeiro e o último ponto a serem 0**
+        # Força o primeiro e o último ponto a serem 0
         y_vals[0] = 0
         y_vals[-1] = 0
 

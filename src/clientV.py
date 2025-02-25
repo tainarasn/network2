@@ -88,14 +88,14 @@ class ClientInterface(tk.Tk):
         if message:
             try:
                 if self.use_encryption:
-                    # 1. Criptografar a mensagem com a Cifra de Vigenère
+                    # criptografar a mensagem com a Cifra de Vigenère
                     key = "aB3$fG7!kL9@mN1#pQ5"  # chave
                     encrypted_message = self.vigenere_encrypt(message, key)
                     
-                    # 2. Codificar a mensagem criptografada em Base64
+                    # codifica a mensagem criptografada em Base64
                     encrypted_message_base64 = base64.b64encode(encrypted_message).decode('latin-1')
                     
-                    # Adicionar padding à string Base64, se necessário
+                    # adiciona padding à string Base64, se necessário
                     padding = len(encrypted_message_base64) % 4
                     if padding:
                         encrypted_message_base64 += '=' * (4 - padding)
@@ -111,12 +111,12 @@ class ClientInterface(tk.Tk):
                     self.text_area.insert(tk.END, "\nMensagem criptografada (Base64):\n","bold")
                     self.text_area.insert(tk.END, f"{encrypted_message_base64}\n")
 
-                    # 3. Converter a mensagem criptografada (Base64) para binário
+                    # converte a mensagem criptografada (Base64) para binário
                     binary_message = self.message_to_binary(encrypted_message_base64)
                     self.text_area.insert(tk.END, f"\nMensagem em binário:", "bold")
                     self.text_area.insert(tk.END, f" {binary_message}\n")
 
-                    # 4. Codificar o binário em sinal 4D-PAM5
+                    # codifica o binário em sinal 4D-PAM5
                     pam5_signal = self.binary_to_pam5(binary_message)
                     self.text_area.insert(tk.END, f"\nSinal 4D-PAM5 da mensagem:\n","bold")
                     self.text_area.insert(tk.END, f"{pam5_signal}\n")
@@ -124,13 +124,13 @@ class ClientInterface(tk.Tk):
                     print(f"Tamanho do sinal 4D-PAM5 enviado: {len(pam5_signal.split(','))}")
                     self.plot_pam5_signal(pam5_signal)
 
-                    # 5. Enviar o sinal 4D-PAM5 para o servidor
+                    # enviar o sinal 4D-PAM5 para o servidor
                     self.send_to_server(pam5_signal)
                     
                     print(f"Mensagem criptografada (bytes): {encrypted_message}")
                     print(f"Mensagem criptografada (Base64): {encrypted_message_base64}")
                 else:
-                    # Se a criptografia estiver desativada, converter a mensagem diretamente para 4D-PAM5
+                    # se a criptografia estiver desativada, converter a mensagem diretamente para 4D-PAM5
                     binary_message = self.message_to_binary(message)
                     pam5_signal = self.binary_to_pam5(message)
                     self.text_area.insert(tk.END, "\nMensagem enviada sem criptografia:\n","bold")
@@ -141,7 +141,7 @@ class ClientInterface(tk.Tk):
                     print(f"Tamanho do sinal 4D-PAM5 enviado: {len(pam5_signal.split(','))}")
                     self.plot_pam5_signal(pam5_signal)
 
-                    # Enviar o sinal 4D-PAM5 para o servidor
+                    # envia o sinal 4D-PAM5 para o servidor
                     self.send_to_server(pam5_signal)
 
             except Exception as e:
@@ -159,32 +159,33 @@ class ClientInterface(tk.Tk):
             x_vals.extend([i, i])  # Mantém cada ponto no mesmo índice X duas vezes
             y_vals.extend([symbols[i], symbols[i]])  # Repete o valor Y para criar um platô
 
-        # **Força o primeiro e o último ponto a serem 0**
+        # força o primeiro e o último ponto a serem 0
         y_vals[0] = 0
         y_vals[-1] = 0
 
-        # Plota a onda quadrada
+        # plota a onda quadrada
         self.ax.step(x_vals, y_vals, where='post', marker='o', linestyle='-', color='b')
         
-        # Adiciona uma linha horizontal fraca no eixo Y = 0
+        # adiciona uma linha horizontal fraca no eixo Y = 0
         self.ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, alpha=0.6)
 
-        # Define os limites do eixo Y
+        # define os limites do eixo Y
         self.ax.set_ylim(-2, 2)
 
-        # Define os ticks do eixo Y para espaçamento de 1 unidade
+        # define os ticks do eixo Y para espaçamento de 1 unidade
         self.ax.set_yticks([-5,-4,-3,-2, -1, 0, 1, 2,3,4,5])  
 
-        # Adiciona rótulos ao gráfico
+        # adiciona rótulos ao gráfico
         self.ax.set_title("Sinal 4D-PAM5")
         self.ax.set_xlabel("Índice")
         self.ax.set_ylabel("Valor")
 
-        # Atualiza o canvas para exibir a nova configuração
+        # atualiza o canvas para exibir a nova configuração
         self.canvas.draw()
 
+    # função 
     def message_to_binary(self, message):
-        # Converter mensagem para binário
+        # converte mensagem para binário
         binary_message = ''.join(format(ord(char), '08b') for char in message)
         print(f"Binário gerado: {binary_message}")
         print(f"Tamanho do binário: {len(binary_message)} bits")
@@ -192,7 +193,7 @@ class ClientInterface(tk.Tk):
         return binary_message
 
     def binary_to_pam5(self, binary_message):
-        # Dividir o binário em grupos de 4 bits
+        # divide o binário em grupos de 4 bits
         binary_groups = [binary_message[i:i+4] for i in range(0, len(binary_message), 4)]
         print(f"Grupos de 4 bits gerados: {len(binary_groups)}")
     
