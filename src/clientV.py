@@ -7,6 +7,7 @@ import numpy as np
 import base64 
 
 class ClientInterface(tk.Tk):
+     # função elaborada pela equipe com bilbiotec Tkinter
     def __init__(self):
         super().__init__()
         self.title("Cliente 4D-PAM5")
@@ -60,7 +61,7 @@ class ClientInterface(tk.Tk):
             '1110': [ 2,  2,-1,-1],  
             '1111': [ 2,  2,  2,  2]  
         }
-
+    # função elaborada pela equipe
     def toggle_encryption(self):
         # Alternar entre ativar e desativar a criptografia
         self.use_encryption = not self.use_encryption
@@ -70,7 +71,7 @@ class ClientInterface(tk.Tk):
             self.encryption_button.config(text="Ativar Criptografia")
         messagebox.showinfo("Criptografia", f"Criptografia {'ativada' if self.use_encryption else 'desativada'}")
 
- 
+     # função adaptada pela equipe da origem: https://www.reddit.com/r/learnpython/comments/jb7f6b/vigenere_cipher_implementation/?tl=pt-br&rdt=54879
     def vigenere_encrypt(self, message, key):
         encrypted_message = b""
         key_length = len(key)
@@ -82,7 +83,7 @@ class ClientInterface(tk.Tk):
             encrypted_message += encrypted_char
         return encrypted_message
     
-
+     # função elaborada pela equipe com a biblioteca Tkinter e Base64
     def send_message(self):
         message = self.entry.get()
         if message:
@@ -146,24 +147,21 @@ class ClientInterface(tk.Tk):
 
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao processar mensagem: {e}")
-
+    # função elaborada pela equipe com biblioteca matplotlib
     def plot_pam5_signal(self, pam5_signal):
         symbols = [float(s) for s in pam5_signal.split(',')]
         self.ax.clear()
         
-        # Lista para os eixos X e Y com transições quadradas
         x_vals = []
         y_vals = []
 
         for i in range(len(symbols)):
-            x_vals.extend([i, i])  # Mantém cada ponto no mesmo índice X duas vezes
-            y_vals.extend([symbols[i], symbols[i]])  # Repete o valor Y para criar um platô
+            x_vals.extend([i, i])
+            y_vals.extend([symbols[i], symbols[i]]) 
 
-        # força o primeiro e o último ponto a serem 0
         y_vals[0] = 0
         y_vals[-1] = 0
 
-        # plota a onda quadrada
         self.ax.step(x_vals, y_vals, where='post', marker='o', linestyle='-', color='b')
         
         # adiciona uma linha horizontal fraca no eixo Y = 0
@@ -172,10 +170,8 @@ class ClientInterface(tk.Tk):
         # define os limites do eixo Y
         self.ax.set_ylim(-2, 2)
 
-        # define os ticks do eixo Y para espaçamento de 1 unidade
         self.ax.set_yticks([-5,-4,-3,-2, -1, 0, 1, 2,3,4,5])  
 
-        # adiciona rótulos ao gráfico
         self.ax.set_title("Sinal 4D-PAM5")
         self.ax.set_xlabel("Índice")
         self.ax.set_ylabel("Valor")
@@ -183,7 +179,7 @@ class ClientInterface(tk.Tk):
         # atualiza o canvas para exibir a nova configuração
         self.canvas.draw()
 
-    # função 
+    # função elaborada pela equipe
     def message_to_binary(self, message):
         # converte mensagem para binário
         binary_message = ''.join(format(ord(char), '08b') for char in message)
@@ -192,6 +188,7 @@ class ClientInterface(tk.Tk):
         
         return binary_message
 
+    # função elaborada pela equipe
     def binary_to_pam5(self, binary_message):
         # divide o binário em grupos de 4 bits
         binary_groups = [binary_message[i:i+4] for i in range(0, len(binary_message), 4)]
@@ -208,7 +205,7 @@ class ClientInterface(tk.Tk):
                 pam5_signal.extend([0, 0, 0, 0])  # Valor padrão se o grupo não for encontrado
         
         return ','.join(map(str, pam5_signal)).strip(',')
-
+    # função elaborada pela equipe com biblioteca socket 
     def send_to_server(self, pam5_signal):
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

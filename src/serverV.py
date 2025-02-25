@@ -8,6 +8,7 @@ import numpy as np
 import base64 
 
 class PAM5Server:
+    # função elaborada pela equipe
     def __init__(self, host="0.0.0.0", port=5050, gui_callback=None):
         self.host = host
         self.port = port
@@ -38,6 +39,7 @@ class PAM5Server:
 
         self.reverse_map = {tuple(v): k for k, v in self.pam5_4d_mapping.items()}
 
+    # função adaptada pela equipe da origem: https://www.reddit.com/r/learnpython/comments/jb7f6b/vigenere_cipher_implementation/?tl=pt-br&rdt=54879
     def vigenere_decrypt(self, encrypted_message, key):
         decrypted_message = b""
         key_length = len(key)
@@ -50,6 +52,7 @@ class PAM5Server:
         return decrypted_message.decode('latin-1')
 
 
+    # função elaborada pela equipe com a biblioteca Tkinter e Base64
     def start(self):
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -121,6 +124,7 @@ class PAM5Server:
         except Exception as e:
             print(f"Erro no servidor: {e}")
 
+    # função elaborada pela equipe
     def pam5_4d_to_binary(self, pam5_signal):
         if not pam5_signal:
             raise ValueError("Sinal 4D-PAM5 recebido está vazio")
@@ -147,6 +151,7 @@ class PAM5Server:
         print(f"Tamanho da mensagem binária: {len(binary_message)} bits")
         return binary_message
 
+    # função elaborada pela equipe
     def binary_to_bytes(self, binary_message):
         binary_message = binary_message.replace(" ", "")
         print(f"Binário para conversão: {binary_message}")
@@ -155,6 +160,7 @@ class PAM5Server:
         return text
             
 class ServerInterface(tk.Tk):
+     # função elaborada pela equipe com biblioteca Tkinter
     def __init__(self):
         super().__init__()
         self.title("Servidor 4D-PAM5")
@@ -181,6 +187,7 @@ class ServerInterface(tk.Tk):
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.get_tk_widget().pack(pady=10)
 
+    # função elaborada pela equipe
     def toggle_decryption(self):
         # alternar entre ativar e desativar a descriptografia
         self.server.use_decryption = not self.server.use_decryption
@@ -190,11 +197,13 @@ class ServerInterface(tk.Tk):
             self.decryption_button.config(text="Ativar Descriptografia")
         messagebox.showinfo("Descriptografia", f"Descriptografia {'ativada' if self.server.use_decryption else 'desativada'}")
 
+    # função adaptada pela equipe de origem: https://pt.stackoverflow.com/questions/341038/como-fazer-threads-para-servidor-em-python
     def start_server(self):
         server_thread = threading.Thread(target=self.server.start, daemon=True)
         server_thread.start()
         messagebox.showinfo("Servidor", "Servidor iniciado e aguardando conexões!")
 
+    # função elaborada pela equipe com a biblioteca Tkinter
     def update_received_message(self, message, pam5_signal,encrypted=''):
         self.text_output.config(text=f"Mensagem original: {message}")
         
@@ -216,19 +225,20 @@ class ServerInterface(tk.Tk):
 
         self.plot_pam5_signal(pam5_signal)
 
+    # função elaborada pela equipe com a bilbioteca matplotlib
     def plot_pam5_signal(self, pam5_signal):
         symbols = [float(s) for s in pam5_signal.split(',')]
         self.ax.clear()
         
-        # Lista para os eixos X e Y com transições quadradas
+        
         x_vals = []
         y_vals = []
 
         for i in range(len(symbols)):
-            x_vals.extend([i, i])  # Mantém cada ponto no mesmo índice X duas vezes
-            y_vals.extend([symbols[i], symbols[i]])  # Repete o valor Y para criar um platô
+            x_vals.extend([i, i])
+            y_vals.extend([symbols[i], symbols[i]])  
 
-        # Força o primeiro e o último ponto a serem 0
+       
         y_vals[0] = 0
         y_vals[-1] = 0
 
